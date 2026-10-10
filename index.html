@@ -2260,7 +2260,6 @@
   const modal = document.getElementById("dvmQuoteModal");
   const form = document.getElementById("dvmQuoteForm");
 
-  // Automatically add Get Quote after Contact
   // inside the existing navigation.
   const navigationLinks = Array.from(
     document.querySelectorAll(
@@ -2268,22 +2267,7 @@
     )
   );
 
-  const contactLink = navigationLinks.find(
-    link => link.textContent.trim().toLowerCase() === "contact"
-  );
-
-  if (contactLink) {
-    const quoteLink = document.createElement("a");
-    quoteLink.href = "#get-quote";
-    quoteLink.textContent = "Get Quote";
-    quoteLink.className = "dvm-quote-nav";
-    quoteLink.addEventListener("click", function (event) {
-      event.preventDefault();
-      openDvmQuote();
-    });
-    contactLink.insertAdjacentElement("afterend", quoteLink);
-  }
-
+  
   window.openDvmQuote = function () {
     modal.classList.add("active");
     document.body.style.overflow = "hidden";
