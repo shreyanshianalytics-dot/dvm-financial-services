@@ -2050,3 +2050,589 @@
 
 </body>
 </html>
+
+<!-- DVM FINANCIAL SERVICES - GET QUOTE FEATURE -->
+
+<style>
+  .dvm-quote-nav {
+    display: inline-block;
+    background: #d9a73d;
+    color: #071b39 !important;
+    padding: 12px 20px;
+    border-radius: 7px;
+    font-weight: 700;
+    text-decoration: none;
+    white-space: nowrap;
+    cursor: pointer;
+  }
+
+  .dvm-quote-nav:hover {
+    background: #efc768;
+  }
+
+  .dvm-quote-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(4, 16, 35, 0.78);
+    z-index: 99999;
+    justify-content: center;
+    align-items: center;
+    padding: 15px;
+    overflow-y: auto;
+  }
+
+  .dvm-quote-overlay.active {
+    display: flex;
+  }
+
+  .dvm-quote-box {
+    background: white;
+    width: 100%;
+    max-width: 530px;
+    max-height: 95vh;
+    overflow-y: auto;
+    border-radius: 14px;
+    padding: 28px;
+    position: relative;
+    color: #142238;
+    font-family: Arial, sans-serif;
+  }
+
+  .dvm-quote-box h2 {
+    color: #0b2040;
+    margin: 0 0 8px;
+    text-align: center;
+  }
+
+  .dvm-quote-box p {
+    text-align: center;
+    color: #64748b;
+    margin-bottom: 22px;
+  }
+
+  .dvm-quote-close {
+    position: absolute;
+    top: 12px;
+    right: 15px;
+    border: none;
+    background: transparent;
+    font-size: 30px;
+    cursor: pointer;
+    color: #333;
+  }
+
+  .dvm-field {
+    margin-bottom: 15px;
+  }
+
+  .dvm-field label {
+    display: block;
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 6px;
+  }
+
+  .dvm-field input,
+  .dvm-field select,
+  .dvm-field textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #cbd5e1;
+    border-radius: 7px;
+    font-size: 15px;
+    box-sizing: border-box;
+    background: #fff;
+    color: #142238;
+  }
+
+  .dvm-quote-submit {
+    background: #d9a73d;
+    color: #071b39;
+    width: 100%;
+    padding: 14px;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+  }
+
+  .dvm-quote-submit:hover {
+    background: #efc768;
+  }
+
+  .dvm-quote-note {
+    font-size: 12px;
+    text-align: center;
+    margin-top: 12px;
+    color: #64748b;
+  }
+</style>
+
+<!-- QUOTATION POPUP -->
+<div id="dvmQuoteModal" class="dvm-quote-overlay"
+     role="dialog" aria-modal="true"
+     aria-labelledby="dvmQuoteTitle">
+
+  <div class="dvm-quote-box">
+
+    <button type="button" class="dvm-quote-close"
+      aria-label="Close quotation form"
+      onclick="closeDvmQuote()">&times;</button>
+
+    <h2 id="dvmQuoteTitle">Get a Free Quote</h2>
+
+    <p>Tell us your requirements and our team
+       will assist you.</p>
+
+    <form id="dvmQuoteForm">
+
+      <div class="dvm-field">
+        <label for="dvmName">Full Name *</label>
+        <input type="text" id="dvmName"
+          placeholder="Enter your full name" required>
+      </div>
+
+      <div class="dvm-field">
+        <label for="dvmPhone">Mobile Number *</label>
+        <input type="tel" id="dvmPhone"
+          placeholder="10-digit mobile number"
+          pattern="[0-9]{10}" maxlength="10"
+          inputmode="numeric" required>
+      </div>
+
+      <div class="dvm-field">
+        <label for="dvmEmail">Email Address</label>
+        <input type="email" id="dvmEmail"
+          placeholder="Enter your email">
+      </div>
+
+      <div class="dvm-field">
+        <label for="dvmService">Required Service *</label>
+        <select id="dvmService" required>
+          <option value="">Select a service</option>
+          <option>Home Loan</option>
+          <option>Loan Against Property</option>
+          <option>Personal Loan</option>
+          <option>Business Loan</option>
+          <option>Property Finance</option>
+          <option>Insurance Assistance</option>
+          <option>Other Financial Services</option>
+        </select>
+      </div>
+
+      <div class="dvm-field">
+        <label for="dvmAmount">
+          Required Loan Amount (INR)
+        </label>
+        <input type="number" id="dvmAmount"
+          min="0" step="1" placeholder="Example: 2500000">
+      </div>
+
+      <div class="dvm-field">
+        <label for="dvmCity">City / Location *</label>
+        <input type="text" id="dvmCity"
+          placeholder="Enter your city" required>
+      </div>
+
+      <div class="dvm-field">
+        <label for="dvmMessage">Additional Requirements</label>
+        <textarea id="dvmMessage" rows="3"
+          placeholder="Tell us about your requirements"></textarea>
+      </div>
+
+      <button type="submit" class="dvm-quote-submit">
+        Send Enquiry via WhatsApp
+      </button>
+
+      <div class="dvm-quote-note">
+        WhatsApp will open with your enquiry.
+        Press Send there to submit your request.
+      </div>
+
+    </form>
+  </div>
+</div>
+
+<script>
+(function () {
+  const modal = document.getElementById("dvmQuoteModal");
+  const form = document.getElementById("dvmQuoteForm");
+
+  // Automatically add Get Quote after Contact
+  // inside the existing navigation.
+  const navigationLinks = Array.from(
+    document.querySelectorAll(
+      "header a, nav a, .navbar a, .nav-links a"
+    )
+  );
+
+  const contactLink = navigationLinks.find(
+    link => link.textContent.trim().toLowerCase() === "contact"
+  );
+
+  if (contactLink) {
+    const quoteLink = document.createElement("a");
+    quoteLink.href = "#get-quote";
+    quoteLink.textContent = "Get Quote";
+    quoteLink.className = "dvm-quote-nav";
+    quoteLink.addEventListener("click", function (event) {
+      event.preventDefault();
+      openDvmQuote();
+    });
+    contactLink.insertAdjacentElement("afterend", quoteLink);
+  }
+
+  window.openDvmQuote = function () {
+    modal.classList.add("active");
+    document.body.style.overflow = "hidden";
+    document.getElementById("dvmName").focus();
+  };
+
+  window.closeDvmQuote = function () {
+    modal.classList.remove("active");
+    document.body.style.overflow = "";
+  };
+
+  modal.addEventListener("click", function (event) {
+    if (event.target === modal) closeDvmQuote();
+  });
+
+  document.addEventListener("keydown", function (event) {
+    if (event.key === "Escape" &&
+        modal.classList.contains("active")) {
+      closeDvmQuote();
+    }
+  });
+
+  form.addEventListener("submit", function (event) {
+    event.preventDefault();
+
+    if (!form.reportValidity()) return;
+
+    const value = id =>
+      document.getElementById(id).value.trim();
+
+    const name = value("dvmName");
+    const phone = value("dvmPhone");
+    const email = value("dvmEmail") || "Not provided";
+    const service = value("dvmService");
+    const amount = value("dvmAmount") || "Not specified";
+    const city = value("dvmCity");
+    const details = value("dvmMessage") || "Not provided";
+
+    const message =
+      "NEW QUOTATION ENQUIRY - DVM FINANCIAL SERVICES\n\n" +
+      "Customer Name: " + name + "\n" +
+      "Mobile: " + phone + "\n" +
+      "Email: " + email + "\n" +
+      "Service: " + service + "\n" +
+      "Loan Amount (INR): " + amount + "\n" +
+      "City: " + city + "\n" +
+      "Requirements: " + details + "\n\n" +
+      "Please contact me regarding my enquiry.";
+
+    const url =
+      "https://wa.me/917997770369?text=" +
+      encodeURIComponent(message);
+
+    window.open(url, "_blank", "noopener,noreferrer");
+  });
+})();
+</script>
+
+<!-- END GET QUOTE FEATURE -->
+
+<!-- DVM FINANCIAL SERVICES - GET QUOTE FEATURE -->
+
+<style>
+  .dvm-quote-nav {
+    display: inline-block;
+    background: #d9a73d;
+    color: #071b39 !important;
+    padding: 12px 20px;
+    border-radius: 7px;
+    font-weight: 700;
+    text-decoration: none;
+    white-space: nowrap;
+    cursor: pointer;
+  }
+
+  .dvm-quote-nav:hover {
+    background: #efc768;
+  }
+
+  .dvm-quote-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(4, 16, 35, 0.78);
+    z-index: 99999;
+    justify-content: center;
+    align-items: center;
+    padding: 15px;
+    overflow-y: auto;
+  }
+
+  .dvm-quote-overlay.active {
+    display: flex;
+  }
+
+  .dvm-quote-box {
+    background: white;
+    width: 100%;
+    max-width: 530px;
+    max-height: 95vh;
+    overflow-y: auto;
+    border-radius: 14px;
+    padding: 28px;
+    position: relative;
+    color: #142238;
+    font-family: Arial, sans-serif;
+  }
+
+  .dvm-quote-box h2 {
+    color: #0b2040;
+    margin: 0 0 8px;
+    text-align: center;
+  }
+
+  .dvm-quote-box p {
+    text-align: center;
+    color: #64748b;
+    margin-bottom: 22px;
+  }
+
+  .dvm-quote-close {
+    position: absolute;
+    top: 12px;
+    right: 15px;
+    border: none;
+    background: transparent;
+    font-size: 30px;
+    cursor: pointer;
+    color: #333;
+  }
+
+  .dvm-field {
+    margin-bottom: 15px;
+  }
+
+  .dvm-field label {
+    display: block;
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 6px;
+  }
+
+  .dvm-field input,
+  .dvm-field select,
+  .dvm-field textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #cbd5e1;
+    border-radius: 7px;
+    font-size: 15px;
+    box-sizing: border-box;
+    background: #fff;
+    color: #142238;
+  }
+
+  .dvm-quote-submit {
+    background: #d9a73d;
+    color: #071b39;
+    width: 100%;
+    padding: 14px;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+  }
+
+  .dvm-quote-submit:hover {
+    background: #efc768;
+  }
+
+  .dvm-quote-note {
+    font-size: 12px;
+    text-align: center;
+    margin-top: 12px;
+    color: #64748b;
+  }
+</style>
+
+<!-- QUOTATION POPUP -->
+<div id="dvmQuoteModal" class="dvm-quote-overlay"
+     role="dialog" aria-modal="true"
+     aria-labelledby="dvmQuoteTitle">
+
+  <div class="dvm-quote-box">
+
+    <button type="button" class="dvm-quote-close"
+      aria-label="Close quotation form"
+      onclick="closeDvmQuote()">&times;</button>
+
+    <h2 id="dvmQuoteTitle">Get a Free Quote</h2>
+
+    <p>Tell us your requirements and our team
+       will assist you.</p>
+
+    <form id="dvmQuoteForm">
+
+      <div class="dvm-field">
+        <label for="dvmName">Full Name *</label>
+        <input type="text" id="dvmName"
+          placeholder="Enter your full name" required>
+      </div>
+
+      <div class="dvm-field">
+        <label for="dvmPhone">Mobile Number *</label>
+        <input type="tel" id="dvmPhone"
+          placeholder="10-digit mobile number"
+          pattern="[0-9]{10}" maxlength="10"
+          inputmode="numeric" required>
+      </div>
+
+      <div class="dvm-field">
+        <label for="dvmEmail">Email Address</label>
+        <input type="email" id="dvmEmail"
+          placeholder="Enter your email">
+      </div>
+
+      <div class="dvm-field">
+        <label for="dvmService">Required Service *</label>
+        <select id="dvmService" required>
+          <option value="">Select a service</option>
+          <option>Home Loan</option>
+          <option>Loan Against Property</option>
+          <option>Personal Loan</option>
+          <option>Business Loan</option>
+          <option>Property Finance</option>
+          <option>Insurance Assistance</option>
+          <option>Other Financial Services</option>
+        </select>
+      </div>
+
+      <div class="dvm-field">
+        <label for="dvmAmount">
+          Required Loan Amount (INR)
+        </label>
+        <input type="number" id="dvmAmount"
+          min="0" step="1" placeholder="Example: 2500000">
+      </div>
+
+      <div class="dvm-field">
+        <label for="dvmCity">City / Location *</label>
+        <input type="text" id="dvmCity"
+          placeholder="Enter your city" required>
+      </div>
+
+      <div class="dvm-field">
+        <label for="dvmMessage">Additional Requirements</label>
+        <textarea id="dvmMessage" rows="3"
+          placeholder="Tell us about your requirements"></textarea>
+      </div>
+
+      <button type="submit" class="dvm-quote-submit">
+        Send Enquiry via WhatsApp
+      </button>
+
+      <div class="dvm-quote-note">
+        WhatsApp will open with your enquiry.
+        Press Send there to submit your request.
+      </div>
+
+    </form>
+  </div>
+</div>
+
+<script>
+(function () {
+  const modal = document.getElementById("dvmQuoteModal");
+  const form = document.getElementById("dvmQuoteForm");
+
+  // Automatically add Get Quote after Contact
+  // inside the existing navigation.
+  const navigationLinks = Array.from(
+    document.querySelectorAll(
+      "header a, nav a, .navbar a, .nav-links a"
+    )
+  );
+
+  const contactLink = navigationLinks.find(
+    link => link.textContent.trim().toLowerCase() === "contact"
+  );
+
+  if (contactLink) {
+    const quoteLink = document.createElement("a");
+    quoteLink.href = "#get-quote";
+    quoteLink.textContent = "Get Quote";
+    quoteLink.className = "dvm-quote-nav";
+    quoteLink.addEventListener("click", function (event) {
+      event.preventDefault();
+      openDvmQuote();
+    });
+    contactLink.insertAdjacentElement("afterend", quoteLink);
+  }
+
+  window.openDvmQuote = function () {
+    modal.classList.add("active");
+    document.body.style.overflow = "hidden";
+    document.getElementById("dvmName").focus();
+  };
+
+  window.closeDvmQuote = function () {
+    modal.classList.remove("active");
+    document.body.style.overflow = "";
+  };
+
+  modal.addEventListener("click", function (event) {
+    if (event.target === modal) closeDvmQuote();
+  });
+
+  document.addEventListener("keydown", function (event) {
+    if (event.key === "Escape" &&
+        modal.classList.contains("active")) {
+      closeDvmQuote();
+    }
+  });
+
+  form.addEventListener("submit", function (event) {
+    event.preventDefault();
+
+    if (!form.reportValidity()) return;
+
+    const value = id =>
+      document.getElementById(id).value.trim();
+
+    const name = value("dvmName");
+    const phone = value("dvmPhone");
+    const email = value("dvmEmail") || "Not provided";
+    const service = value("dvmService");
+    const amount = value("dvmAmount") || "Not specified";
+    const city = value("dvmCity");
+    const details = value("dvmMessage") || "Not provided";
+
+    const message =
+      "NEW QUOTATION ENQUIRY - DVM FINANCIAL SERVICES\n\n" +
+      "Customer Name: " + name + "\n" +
+      "Mobile: " + phone + "\n" +
+      "Email: " + email + "\n" +
+      "Service: " + service + "\n" +
+      "Loan Amount (INR): " + amount + "\n" +
+      "City: " + city + "\n" +
+      "Requirements: " + details + "\n\n" +
+      "Please contact me regarding my enquiry.";
+
+    const url =
+      "https://wa.me/917997770369?text=" +
+      encodeURIComponent(message);
+
+    window.open(url, "_blank", "noopener,noreferrer");
+  });
+})();
+</script>
+
+<!-- END GET QUOTE FEATURE -->
